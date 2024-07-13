@@ -1,4 +1,6 @@
 import os
+import logging
+from datetime import datetime
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, ValidationError
@@ -6,6 +8,24 @@ import openai
 import groq
 
 load_dotenv()
+
+# Set up logging
+log_level = os.getenv("LOG_LEVEL", "DEBUG")
+log_path = os.getenv("LOG_PATH", "logs")
+log_path += "\\llm\\"
+
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+
+log_filename = os.path.join(log_path, f"llm_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+
+logging.basicConfig(
+    filename=log_filename,
+    level=log_level,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 class LLMConfig(BaseModel):
     """
@@ -29,6 +49,7 @@ class LLMConfig(BaseModel):
         """
         api_key = os.getenv(self.api_key_env)
         if not api_key:
+            logger.error(f"API key not found in environment for {self.api_key_env}")
             raise ValueError(f"API key not found in environment for {self.api_key_env}")
         return api_key
 
@@ -69,7 +90,10 @@ class LLM:
         elif self.provider == "groq":
             self.client = groq.Groq(api_key=self.api_key)
         else:
+            logger.error(f"Unsupported provider: {self.provider}")
             raise ValueError(f"Unsupported provider: {self.provider}")
+
+        logger.info(f"Initialized LLM with provider: {self.provider}")
 
     def generate_completion(self, messages: List[Message]) -> str:
         """
@@ -81,12 +105,19 @@ class LLM:
         Returns:
             str: The generated completion text.
         """
-        if self.provider == "openai":
-            return self._generate_openai_completion(messages)
-        elif self.provider == "groq":
-            return self._generate_groq_completion(messages)
-        else:
-            raise ValueError(f"Unsupported provider: {self.provider}")
+        try:
+            if self.provider == "openai":
+                result = self._generate_openai_completion(messages)
+            elif self.provider == "groq":
+                result = self._generate_groq_completion(messages)
+            else:
+                logger.error(f"Unsupported provider: {self.provider}")
+                raise ValueError(f"Unsupported provider: {self.provider}")
+            logger.info("Generated completion successfully")
+            return result
+        except Exception as e:
+            logger.exception("Error generating completion")
+            raise
 
     def _generate_openai_completion(self, messages: List[Message]) -> str:
         """
@@ -168,6 +199,8 @@ if __name__ == "__main__":
         print("OpenAI response:\n{}\n".format(openai_response))
         print("Groq response:\n{}\n".format(groq_response))
     except ValidationError as e:
+        logger.error(f"Configuration error: {e}")
         print(f"Configuration error: {e}")
     except Exception as e:
+        logger.exception("An error occurred")
         print(f"An error occurred: {e}")
