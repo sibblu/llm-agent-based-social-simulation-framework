@@ -1,11 +1,14 @@
-import os
 import logging
+import os
 from datetime import datetime
-from dotenv import load_dotenv
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field, ValidationError
-import openai
+from typing import Any, Dict, List, Optional
+
 import groq
+import openai
+from dotenv import load_dotenv
+from pydantic import BaseModel, Field, ValidationError
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 from ..managers.prompt_manager import PromptManager
 
 load_dotenv()
@@ -28,6 +31,10 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Fetch retry configurations from .env
+num_retries = int(os.getenv("NUM_RETRIES", 3))
+wait_time = int(os.getenv("WAIT_TIME", 2))
+
 class LLMConfig(BaseModel):
     """
     Configuration class for the LLM settings.
@@ -40,6 +47,8 @@ class LLMConfig(BaseModel):
     top_p: float = 1.0
     stream: bool = False
     stop: Optional[List[str]] = None
+    response_format: Optional[Dict[str, Any]] = None
+
 
     def get_api_key(self) -> str:
         """
@@ -80,6 +89,7 @@ class LLM:
                 - top_p: The nucleus sampling parameter for the LLM.
                 - stream: Whether to stream the response from the LLM.
                 - stop: List of strings to stop generation at (optional).
+                - response_format: Dictionary specifying the format of the response (optional). Eg. "response_format": {"type": "json_object"}
 
         """
         self.provider = provider.lower()
@@ -95,10 +105,11 @@ class LLM:
             raise ValueError("Unsupported provider: %s", self.provider)
 
         logger.info("Initialized LLM object with provider: %s", self.provider)
-
-    def generate_completion(self, messages: List[Message]) -> str:
+    
+    @retry(stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True)
+    def generate_response(self, messages: List[Message]) -> str:
         """
-        Generate a completion for the given messages using the specified LLM provider.
+        Generate a response (chat completion) for the given messages using the specified LLM provider.
 
         Args:
             messages (List[Message]): List of messages to be processed by the LLM.
@@ -175,6 +186,8 @@ if __name__ == "__main__":
             "top_p": 1.0,
             "stream": False,
             "stop": None,
+            "response_format": {"type": "json_object"}
+
         }
 
         config_groq = {
@@ -185,18 +198,19 @@ if __name__ == "__main__":
             "top_p": 1.0,
             "stream": False,
             "stop": None,
+            "response_format": {"type": "json_object"}
         }
 
         messages = [
-            Message(role="system", content="You are a helpful assistant."),
+            Message(role="system", content="You are a helpful assistant. Respond in JSON format."),
             Message(role="user", content="What is the capital of France? Respond in Hindi and French."),
         ]
 
         openai_llm = LLM(provider="openai", config=config_openai)
-        openai_response = openai_llm.generate_completion(messages=messages)
+        openai_response = openai_llm.generate_response(messages=messages)
         
         groq_llm = LLM(provider="groq", config=config_groq)
-        groq_response = groq_llm.generate_completion(messages=messages)
+        groq_response = groq_llm.generate_response(messages=messages)
 
         print("OpenAI response:\n{}\n".format(openai_response))
         print("Groq response:\n{}\n".format(groq_response))
