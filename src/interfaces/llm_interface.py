@@ -6,18 +6,19 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, ValidationError
 import openai
 import groq
+from ..managers.prompt_manager import PromptManager
 
 load_dotenv()
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "DEBUG")
+log_level = os.getenv("LOG_LEVEL", "INFO")
 log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\llm\\"
+log_path += "\\llm_interface\\"
 
 if not os.path.exists(log_path):
     os.makedirs(log_path)
 
-log_filename = os.path.join(log_path, f"llm_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+log_filename = os.path.join(log_path, f"llm_interface_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
 logging.basicConfig(
     filename=log_filename,
@@ -90,10 +91,10 @@ class LLM:
         elif self.provider == "groq":
             self.client = groq.Groq(api_key=self.api_key)
         else:
-            logger.error(f"Unsupported provider: {self.provider}")
-            raise ValueError(f"Unsupported provider: {self.provider}")
+            logger.error("Unsupported provider: %s", self.provider)
+            raise ValueError("Unsupported provider: %s", self.provider)
 
-        logger.info(f"Initialized LLM with provider: {self.provider}")
+        logger.info("Initialized LLM object with provider: %s", self.provider)
 
     def generate_completion(self, messages: List[Message]) -> str:
         """
@@ -106,32 +107,34 @@ class LLM:
             str: The generated completion text.
         """
         try:
+            formatted_messages = PromptManager.format_prompt(self.provider, [msg.model_dump() for msg in messages])
             if self.provider == "openai":
-                result = self._generate_openai_completion(messages)
+                response = self._generate_openai_completion(formatted_messages)
             elif self.provider == "groq":
-                result = self._generate_groq_completion(messages)
+                response = self._generate_groq_completion(formatted_messages)
             else:
                 logger.error(f"Unsupported provider: {self.provider}")
                 raise ValueError(f"Unsupported provider: {self.provider}")
             logger.info("Generated completion successfully")
-            return result
+            logger.debug("Completion: %s", response)
+            return response
         except Exception as e:
             logger.exception("Error generating completion")
             raise
 
-    def _generate_openai_completion(self, messages: List[Message]) -> str:
+    def _generate_openai_completion(self, messages: List[Dict[str, str]]) -> str:
         """
         Generate a completion using the OpenAI API.
 
         Args:
-            messages (List[Message]): List of messages to be processed by the OpenAI LLM.
+            messages (List[Dict[str, str]]): List of formatted messages to be processed by the OpenAI LLM.
 
         Returns:
             str: The generated completion text.
         """
         response = self.client.chat.completions.create(
             model=self.config.model,
-            messages=[msg.model_dump() for msg in messages],
+            messages=messages,
             temperature=self.config.temperature,
             max_tokens=self.config.max_tokens,
             top_p=self.config.top_p,
@@ -140,18 +143,18 @@ class LLM:
         )
         return response.choices[0].message.content
 
-    def _generate_groq_completion(self, messages: List[Message]) -> str:
+    def _generate_groq_completion(self, messages: List[Dict[str, str]]) -> str:
         """
         Generate a completion using the Groq API.
 
         Args:
-            messages (List[Message]): List of messages to be processed by the Groq LLM.
+            messages (List[Dict[str, str]]): List of formatted messages to be processed by the Groq LLM.
 
         Returns:
             str: The generated completion text.
         """
         response = self.client.chat.completions.create(
-            messages=[msg.model_dump() for msg in messages],
+            messages=messages,
             model=self.config.model,
             temperature=self.config.temperature,
             max_tokens=self.config.max_tokens,
@@ -195,12 +198,11 @@ if __name__ == "__main__":
         groq_llm = LLM(provider="groq", config=config_groq)
         groq_response = groq_llm.generate_completion(messages=messages)
 
-
         print("OpenAI response:\n{}\n".format(openai_response))
         print("Groq response:\n{}\n".format(groq_response))
     except ValidationError as e:
-        logger.error(f"Configuration error: {e}")
-        print(f"Configuration error: {e}")
+        print("Validation Error:", e)
+        logger.error("Validation Error:", e)
     except Exception as e:
-        logger.exception("An error occurred")
-        print(f"An error occurred: {e}")
+        print("Error:", e)
+        logger.error("Error:", e)
