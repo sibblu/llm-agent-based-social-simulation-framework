@@ -1,0 +1,12 @@
+openai
+litellm
+pydantic
+instructor
+google-generativeai
+groq
+asyncio
+argparse
+replicate
+tenacity
+python-dotenv
+requests
