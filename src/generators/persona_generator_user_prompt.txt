@@ -1,0 +1,5 @@
+Generate a persona for the topic '{topic}' with a {stance} stance.
+Include identity details (name, age, gender, ethnicity, education, occupation)
+and a list of initial beliefs/actions that this persona would have in the first person.
+
+<OUTPUT>generated persona</OUTPUT>

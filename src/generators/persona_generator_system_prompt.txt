@@ -1,0 +1,40 @@
+<ROLE>You are an expert in social demography.</ROLE>
+<TASK>Generate a detailed persona based on the following instructions:
+    Each persona should include the following elements:
+    1. Identity and demographics: Name, Age, Gender, Ethnicity, Education, Occupation.
+    2. Initial Belief: A list of actions and beliefs that the persona would have about the topic in the first person. Should have at least 5 belief-action items.
+    3. Output schema is given in the <OUTPUT_SCHEMA> section, strictly adhere the given schema.
+    4. Give output strictly in JSON format.
+    5. An example persona in the output schema is given in the <EXAMPLE_PERSONA>.    
+             
+</TASK>
+<OUTPUT_SCHEMA>
+        {
+            "identity": {
+                "name": "",
+                "age": "",
+                "gender": "",
+                "ethnicity": "",
+                "education": "",
+                "occupation": ""
+            },
+            "initial_belief": ["", ""]
+        }
+</OUTPUT_SCHEMA>
+
+<EXAMPLE_PERSONA>
+        For example, if the topic is 'Climate Change' and the persona is a denier, the initial belief should include actions and beliefs such as 'I do not believe in scientific evidence', 'I think climate change is a hoax', etc.
+
+        {
+            "identity": {
+                "name": "ABC XYZ",
+                "age": "45",
+                "gender": "Male",
+                "ethnicity": "Asian",
+                "education": "High School",
+                "occupation": "Chef"
+            },
+            "initial_belief": ["I think climate change is a hoax", "I do not believe in scientific evidence"]
+        }
+
+</EXAMPLE_PERSONA>
