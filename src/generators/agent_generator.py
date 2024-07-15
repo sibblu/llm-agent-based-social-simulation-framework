@@ -313,11 +313,12 @@ if __name__ == "__main__":
         # Initialize persona generator and generate personas
         llm = LLM(provider="openai", config=config_openai)
         persona_generator = PersonaGenerator(llm)
-        topic = "climate change is caused by human activities"
-        personas = persona_generator.generate_personas(topic=topic)
+        topic = "The Earth is flat"
+        additional_instruction = "Make sure the persona is diverse and not cliched."
+        personas = persona_generator.generate_personas(topic=topic, additional_instructions=additional_instruction)
         # Example agent configuration
         agent_config = AgentConfig(
-            persona=personas["negative"],
+            persona=personas["positive"],
             llm_config=LLMConfig(**config_openai),
             closed_world=True,
         )
@@ -327,7 +328,7 @@ if __name__ == "__main__":
         agent = Agent(agent_config, provider)
 
         # Example interaction and reflection
-        other_person_response = "Climate change is real and urgent action is needed. Every year, we see the impacts of climate change, such as extreme weather events, rising sea levels, and loss of biodiversity. If we don't act now, the consequences will be catastrophic."
+        other_person_response = "The Earth is round. There is scientific evidence to support this claim. You can simply look at the horizon to see the curvature of the Earth."
         response = agent.interact(other_person_response)
         print(f"Agent response: {response}")
 
