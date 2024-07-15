@@ -54,29 +54,31 @@ class PersonaGenerator:
         """
         self.llm = llm
 
-    def generate_personas(self, topic: str) -> Dict[str, Persona]:
+    def generate_personas(self, topic: str, additional_instructions:str = None) -> Dict[str, Persona]:
         """
         Generate two personas (one in support and one against the topic).
 
         Args:
             topic (str): The topic for which personas need to be generated.
+            additional_instructions (str): Additional instructions for generating the personas.
 
         Returns:
             Dict[str, Persona]: A dictionary containing the generated personas.
         """
         personas = {}
         for stance in ["positive", "negative"]:
-            persona = self._generate_persona(topic, stance)
+            persona = self._generate_persona(topic, stance, additional_instructions)
             personas[f"{stance}"] = persona
         return personas
 
-    def _generate_persona(self, topic: str, stance: str) -> Persona:
+    def _generate_persona(self, topic: str, stance: str, additional_instruction: str = None) -> Persona:
         """
         Generate a persona for a given stance on the topic.
 
         Args:
             topic (str): The topic for which the persona is generated.
             stance (str): The stance of the persona ('positive' or 'negative').
+            additional_instruction (str): Additional instructions for generating the persona.
 
         Returns:
             Persona: The generated persona.
@@ -127,7 +129,7 @@ class PersonaGenerator:
         Generate a persona for the topic '{topic}' with a {stance} stance.
         Include identity details (name, age, gender, ethnicity, education, occupation)
         and a list of initial beliefs/actions that this persona would have in the first person.
-
+        {additional_instructions}
         <OUTPUT>generated persona</OUTPUT>
         """
         system_prompt = Message(
@@ -137,7 +139,7 @@ class PersonaGenerator:
 
         user_prompt = Message(
             role="user",
-            content=user_prompt_str.format(topic=topic, stance=stance)
+            content=user_prompt_str.format(topic=topic, stance=stance, additional_instructions=additional_instruction or "")
         )
 
         try:
