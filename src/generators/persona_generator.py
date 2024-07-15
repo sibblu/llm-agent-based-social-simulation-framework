@@ -86,7 +86,7 @@ class PersonaGenerator:
         <TASK>Generate a detailed persona based on the following instructions:
             Each persona should include the following elements:
             1. Identity and demographics: Name, Age, Gender, Ethnicity, Education, Occupation.
-            2. Initial Belief: A list of actions and beliefs that the persona would have about the topic in the first person. Should have at least 5 belief-action items.
+            2. Initial Belief: A list of actions and beliefs that the persona would have about the topic in the first person. Should have more than 5 belief-action items.
             3. Output schema is given in the <OUTPUT_SCHEMA> section, strictly adhere the given schema.
             4. Give output strictly in JSON format.
             5. An example persona in the output schema is given in the <EXAMPLE_PERSONA>.    
