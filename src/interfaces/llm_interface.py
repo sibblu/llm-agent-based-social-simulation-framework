@@ -116,6 +116,23 @@ class LLM:
     @retry(
         stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True
     )
+    def generate_completion(self, messages: List[Message]) -> str:
+        """Fallback to generate_response. (For backward compatibility)
+        message: List[Message]
+         - Message: role: str, content: str
+         - Example:
+         messages = [
+            Message(role="system", content="You are a helpful assistant. Respond in JSON format."),
+            Message(role="user", content="What is the capital of France? Respond in Hindi and French.")
+        ]
+
+        
+        """
+        return self.generate_response(messages)
+    
+    @retry(
+        stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True
+    )
     def generate_response(self, messages: List[Message]) -> str:
         """
         Generate a response (chat completion) for the given messages using the specified LLM provider.
