@@ -21,11 +21,11 @@ if not os.path.exists(log_path):
 
 log_filename = os.path.join(log_path, f"persona_generator_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
-logging.basicConfig(
-    filename=log_filename,
-    level=log_level,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+# logging.basicConfig(
+#     filename=log_filename,
+#     level=log_level,
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class PersonaGenerator:
         personas = {}
         for stance in ["positive", "negative"]:
             persona = self._generate_persona(topic, stance)
-            personas[f"{topic}_{stance}"] = persona
+            personas[f"{stance}"] = persona
         return personas
 
     def _generate_persona(self, topic: str, stance: str) -> Persona:
