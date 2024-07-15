@@ -21,13 +21,15 @@ log_path += "\\llm_interface\\"
 if not os.path.exists(log_path):
     os.makedirs(log_path)
 
-log_filename = os.path.join(log_path, f"llm_interface_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-
-logging.basicConfig(
-    filename=log_filename,
-    level=log_level,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_filename = os.path.join(
+    log_path, f"llm_interface_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 )
+
+# logging.basicConfig(
+#     filename=log_filename,
+#     level=log_level,
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +37,13 @@ logger = logging.getLogger(__name__)
 num_retries = int(os.getenv("NUM_RETRIES", 3))
 wait_time = int(os.getenv("WAIT_TIME", 2))
 
+
 class LLMConfig(BaseModel):
     """
     Configuration class for the LLM settings.
     Uses pydantic for data validation and type checking.
     """
+
     api_key_env: str
     model: str
     temperature: float = 1.0
@@ -48,7 +52,6 @@ class LLMConfig(BaseModel):
     stream: bool = False
     stop: Optional[List[str]] = None
     response_format: Optional[Dict[str, Any]] = None
-
 
     def get_api_key(self) -> str:
         """
@@ -63,18 +66,22 @@ class LLMConfig(BaseModel):
             raise ValueError(f"API key not found in environment for {self.api_key_env}")
         return api_key
 
+
 class Message(BaseModel):
     """
     Class representing a message in the conversation.
     Ensures the role is one of 'system', 'user', or 'assistant' and contains message content.
     """
+
     role: str = Field(..., pattern="^(system|user|assistant)$")
     content: str
+
 
 class LLM:
     """
     Wrapper class for interacting with different LLM API providers (OpenAI, Groq).
     """
+
     def __init__(self, provider: str, config: Dict[str, Any]):
         """
         Initialize the LLM object with the specified provider and configuration.
@@ -105,8 +112,10 @@ class LLM:
             raise ValueError("Unsupported provider: %s", self.provider)
 
         logger.info("Initialized LLM object with provider: %s", self.provider)
-    
-    @retry(stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True)
+
+    @retry(
+        stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True
+    )
     def generate_response(self, messages: List[Message]) -> str:
         """
         Generate a response (chat completion) for the given messages using the specified LLM provider.
@@ -118,7 +127,9 @@ class LLM:
             str: The generated completion text.
         """
         try:
-            formatted_messages = PromptManager.format_prompt(self.provider, [msg.model_dump() for msg in messages])
+            formatted_messages = PromptManager.format_prompt(
+                self.provider, [msg.model_dump() for msg in messages]
+            )
             if self.provider == "openai":
                 response = self._generate_openai_completion(formatted_messages)
             elif self.provider == "groq":
@@ -175,6 +186,7 @@ class LLM:
         )
         return response.choices[0].message.content
 
+
 if __name__ == "__main__":
     try:
         # Example configuration dictionary
@@ -186,8 +198,7 @@ if __name__ == "__main__":
             "top_p": 1.0,
             "stream": False,
             "stop": None,
-            "response_format": {"type": "json_object"}
-
+            "response_format": {"type": "json_object"},
         }
 
         config_groq = {
@@ -198,17 +209,23 @@ if __name__ == "__main__":
             "top_p": 1.0,
             "stream": False,
             "stop": None,
-            "response_format": {"type": "json_object"}
+            "response_format": {"type": "json_object"},
         }
 
         messages = [
-            Message(role="system", content="You are a helpful assistant. Respond in JSON format."),
-            Message(role="user", content="What is the capital of France? Respond in Hindi and French."),
+            Message(
+                role="system",
+                content="You are a helpful assistant. Respond in JSON format.",
+            ),
+            Message(
+                role="user",
+                content="What is the capital of France? Respond in Hindi and French.",
+            ),
         ]
 
         openai_llm = LLM(provider="openai", config=config_openai)
         openai_response = openai_llm.generate_response(messages=messages)
-        
+
         groq_llm = LLM(provider="groq", config=config_groq)
         groq_response = groq_llm.generate_response(messages=messages)
 
