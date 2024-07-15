@@ -29,22 +29,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class MemoryRecord(BaseModel):
+class MemoryStream(BaseModel):
     """
-    Data structure for an individual memory record in cumulative memory.
+    Data structure for memory stream.
     """
-
-    timestamp: str
-    type: str  # "read" or "respond"
-    content: str
-
-
-class ReflectiveMemory(BaseModel):
-    """
-    Data structure for reflective memory.
-    """
-
-    reflections: List[str] = []
+    agent_id: str
+    agent_name: str
+    topic_claim: str
+    stance: str
+    cumulative_memory: List[Dict[str, str]] = []
+    reflective_memory: List[Dict[str, str]] = []
 
 
 class AgentConfig(BaseModel):
@@ -55,7 +49,6 @@ class AgentConfig(BaseModel):
     persona: Persona
     llm_config: LLMConfig
     closed_world: bool = False
-    claim: str
 
 
 class Agent:
@@ -123,9 +116,13 @@ class Agent:
         self.persona = agent_config.persona
         self.llm = LLM(provider=provider, config=agent_config.llm_config.dict())
         self.closed_world = agent_config.closed_world
-        self.claim = agent_config.claim
-        self.cumulative_memory = []  # List of MemoryRecord
-        self.reflective_memory = ReflectiveMemory()
+        self.claim = self.persona.topic
+        self.memory_stream = MemoryStream(
+            agent_id=self.agent_id,
+            agent_name=self.persona.identity["name"],
+            topic_claim=self.claim,
+            stance=self.persona.stance,
+        )
         self.current_reflection = None
         if not self.closed_world:
             self.system_prompt = Message(
@@ -189,7 +186,7 @@ class Agent:
         Returns:
             str: The reflection prompt.
         """
-        if not self.reflective_memory.reflections:
+        if not self.current_reflection:
             return Agent.prompt_templates["reflection_prompt"].format(
                 past_reflection="No past reflections",
                 other_person_response=other_person_response,
@@ -249,7 +246,7 @@ class Agent:
             logger.exception(f"Error during reflection for agent {self.agent_id}")
             raise e
 
-    def _update_memories(self, agent_response: str, other_person_response: str):
+    def _update_memories(self, agent_response: str, other_person_response: str) -> None:
         """
         Update the agent's memories (cumulative and reflective) based on the interaction.
 
@@ -260,18 +257,30 @@ class Agent:
         # Update cumulative memory
         timestamp = datetime.now().isoformat()
         if other_person_response:
-            self.cumulative_memory.append(
-                MemoryRecord(
-                    timestamp=timestamp, type="read", content=other_person_response
-                )
+            self.memory_stream.cumulative_memory.append(
+                {
+                    "timestamp": timestamp,
+                    "type": "read",
+                    "content": other_person_response
+                }
             )
-        self.cumulative_memory.append(
-            MemoryRecord(timestamp=timestamp, type="respond", content=agent_response)
+
+        self.memory_stream.cumulative_memory.append(
+            {
+                "timestamp": timestamp,
+                "type": "respond",
+                "content": agent_response
+            }
         )
 
         # Update reflective memory
         reflection_response = self.reflect(other_person_response, agent_response)
-        self.reflective_memory.reflections.append(reflection_response)
+        self.memory_stream.reflective_memory.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "content": reflection_response
+            }
+        )
 
     def save_memory_stream(self, filepath: str):
         """
@@ -283,8 +292,7 @@ class Agent:
         if not os.path.exists(filepath):
             open(filepath, 'w').close()
         with open(filepath, "w") as file:
-            for record in self.cumulative_memory:
-                file.write(record.json() + "\n")
+            file.write(self.memory_stream.model_dump_json(indent=2))
         logger.info(f"Agent {self.agent_id} memory stream saved to {filepath}")
 
 
@@ -294,7 +302,7 @@ if __name__ == "__main__":
         config_openai = {
             "api_key_env": "OPENAI_API_KEY",
             "model": "gpt-4o-2024-05-13",
-            "temperature": 1.0,
+            "temperature": 0.5,
             "max_tokens": 1024,
             "top_p": 1.0,
             "stream": False,
@@ -305,15 +313,13 @@ if __name__ == "__main__":
         # Initialize persona generator and generate personas
         llm = LLM(provider="openai", config=config_openai)
         persona_generator = PersonaGenerator(llm)
-        topic = "Climate Change"
+        topic = "climate change is caused by human activities"
         personas = persona_generator.generate_personas(topic=topic)
-        claim = "climate change is caused by human activities"
         # Example agent configuration
         agent_config = AgentConfig(
             persona=personas["negative"],
             llm_config=LLMConfig(**config_openai),
             closed_world=True,
-            claim=claim,
         )
 
         # Initialize agent
@@ -329,7 +335,7 @@ if __name__ == "__main__":
         print(f"Agent reflection: {reflection}")
 
         # Save agent memory stream
-        # agent.save_memory_stream(f"/data/agent_{agent.agent_id}_memory.jsonl")
+        agent.save_memory_stream(f"./data/agent_{agent.agent_id}_memory.jsonl")
 
     except ValidationError as e:
         logger.error(f"Configuration error: {e}")
