@@ -64,11 +64,15 @@ class Agent:
             <INITIAL_BELIEF>Your initial belief:
             {initial_belief}
             </INITIAL_BELIEF>
-
-            Now, {agent_name}, you will interact and discuss with another person about the theory XYZ. 
-            You can decide to change or maintain your belief about the theory XYZ that claims that {claim} after interacting with other person.
-            You would respond such that reflects your honest belief, and you would also read other persons’ response.
-            After reading other persons' response, you would be asked about your belief about the theory XYZ that {claim}.""",
+            <INSTRUCTION>
+            Now, {agent_name}, you will interact and discuss with another person about the theory XYZ that claims that {claim}. 
+            You can decide to change or maintain your belief about the theory XYZ after interacting (reading their thought/response) with other person.
+            You should respond in a manner that reflects your current honest belief, and you should also read the other person's response carefully.
+            
+            After each interaction, you will be given chance to reflect on the conversation and update your reflective memory. Based on your reflection, decide if you wish to continue or discontinue the conversation.
+            If you believe that continuing the conversation is no longer productive or if you have reached a firm conclusion, then respond with "I have decided to discontinue the conversation.".
+            If you decide to continue, proceed with your regular response without indicating your decision to continue.
+            </INSTRUCTION>""",
 
         "response_prompt": """{agent_name}, given below is your experience so far, and the other person's message for you. Write your response. The response should reflect your current honest belief about the theory XYZ that claims that {claim}.
             <PAST_REFLECTION>Your past reflections:
