@@ -1,0 +1,2 @@
+Positive Agent - Bias: 1.8, Diversity: 0.4
+Negative Agent - Bias: 0.5333333333333333, Diversity: 1.14697670227235
