@@ -60,7 +60,7 @@ class Evaluation:
 
         Answer with a single opinion value within the options -2, -1, 0, 1, 2."""
         
-        input_ids = self.tokenizer.encode(prompt, return_tensors="pt", truncation=True, max_length=512)
+        input_ids = self.tokenizer.encode(prompt, return_tensors="pt", truncation=True, max_length=512).to(self.model.device)
         outputs = self.model.generate(input_ids=input_ids, max_length=10)
         score = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         
