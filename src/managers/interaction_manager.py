@@ -68,12 +68,16 @@ class InteractionManager:
             print("\n-----------------------------------\n")
             timestamp = datetime.now().isoformat()
             self.transcript.append({
-                "agent_id": agent.agent_id,
+                "message_number": messages_exchanged,
+                "agent_name": agent.persona.identity["name"],
+                "topic": agent.persona.topic,
                 "stance": agent.persona.stance,
                 "response": response,
                 "current_reflection": agent.current_reflection,
                 "timestamp": timestamp,
                 "llm_model": agent.llm.config.model,
+                "agent_id": agent.agent_id,
+
             })
 
             logger.info("Agent {agent_name} responded with: {response}".format(agent_name=agent.persona.identity["name"], response=response))
