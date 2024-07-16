@@ -90,10 +90,9 @@ class PersonaGenerator:
             1. Identity and demographics: Name, Age, Gender, Ethnicity, Education, Occupation.
             2. Initial Belief: A list of actions and beliefs that the persona would have about the topic in the first person. Should have more than 5 belief-action items.
             3. Output schema is given in the <OUTPUT_SCHEMA> section, strictly adhere the given schema.
-            4. Give output strictly in JSON format.
+            4. Give output strictly in JSON format in the output schema, no additional fields or explanation.
+            5. Output must be json parsable, no special characters or new lines in the output.
             5. An example persona in the output schema is given in the <EXAMPLE_PERSONA>.    
-                    
-        </TASK>
         <OUTPUT_SCHEMA>
                 {
                     "identity": {
@@ -122,7 +121,11 @@ class PersonaGenerator:
                     },
                     "initial_belief": ["I think climate change is a hoax", "I do not believe in scientific evidence"]
                 }
-        </EXAMPLE_PERSONA>
+        </EXAMPLE_PERSONA>            
+        </TASK>
+        
+
+        <OUTPUT>generated persona</OUTPUT>
         """
         
         user_prompt_str = """
@@ -145,6 +148,13 @@ class PersonaGenerator:
         try:
             logger.info(f"Generating persona for topic: {topic}, stance: {stance}")
             response = self.llm.generate_response(messages=[system_prompt, user_prompt])
+            # check if response is empty or None
+            if not response:
+                raise ValueError("Empty response received from LLM")
+            
+            # Parse the response from the LLM, remove triple backticks if present
+            response = response.replace("```", "")
+
             persona_data = json.loads(response)
 
             persona_id = f"{topic}_{stance}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
