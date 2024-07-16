@@ -19,10 +19,10 @@ log_filename = os.path.join(
     log_path, f"evaluation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 )
 
-logging.basicConfig(
-    level=log_level,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+# logging.basicConfig(
+#     level=log_level,
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class Evaluation:
         Args:
             model_name (str): The name of the Hugging Face model to load.
         """
-        self.model = T5ForConditionalGeneration.from_pretrained(model_name,device_map="auto", load_in_8bit=True)
+        self.model = T5ForConditionalGeneration.from_pretrained(model_name,device_map="auto", load_in_4bit=True)
         self.tokenizer = T5Tokenizer.from_pretrained(model_name)
         logger.info(f"Loaded model {model_name}")
 
@@ -60,8 +60,8 @@ class Evaluation:
 
         Answer with a single opinion value within the options -2, -1, 0, 1, 2."""
         
-        input_ids = self.tokenizer(prompt, return_tensors="pt")
-        outputs = self.model.generate(input_ids=input_ids["input_ids"], attention_mask=input_ids["attention_mask"], max_length=10)
+        input_ids = self.tokenizer.encode(prompt, return_tensors="pt", truncation=True, max_length=512)
+        outputs = self.model.generate(input_ids=input_ids, max_length=10)
         score = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         
         try:
