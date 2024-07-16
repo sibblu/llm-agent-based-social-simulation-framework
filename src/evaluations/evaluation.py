@@ -110,8 +110,8 @@ class Evaluation:
 if __name__ == "__main__":
     try:
         # Example configuration
-        transcript_filepath = "./data/interaction_transcripts/transcript_20240716_054625.jsonl"
-        evaluated_transcript_filepath = "./data/interaction_transcripts/evaluated_transcript_20240716_054625.jsonl"
+        transcript_filepath = "./data/interaction_transcripts/transcript_20240716_080039.jsonl"
+        evaluated_transcript_filepath = "./data/interaction_transcripts/evaluated_transcript_20240716_080039.jsonl"
         claim = "climate change is caused by human activities"
 
         # Load the transcript
