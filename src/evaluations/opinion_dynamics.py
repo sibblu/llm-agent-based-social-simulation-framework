@@ -8,16 +8,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "INFO")
-log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\opinion_dynamics\\"
+# log_level = os.getenv("LOG_LEVEL", "INFO")
+# log_path = os.getenv("LOG_PATH", "logs")
+# log_path += "\\opinion_dynamics\\"
 
-if not os.path.exists(log_path):
-    os.makedirs(log_path)
+# if not os.path.exists(log_path):
+#     os.makedirs(log_path)
 
-log_filename = os.path.join(
-    log_path, f"opinion_dynamics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-)
+# log_filename = os.path.join(
+#     log_path, f"opinion_dynamics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# )
 
 # logging.basicConfig(
 #     filename=log_filename,

@@ -5,19 +5,20 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import torch
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer,
+                          T5ForConditionalGeneration, T5Tokenizer)
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "INFO")
-log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\evaluation\\"
+# log_level = os.getenv("LOG_LEVEL", "INFO")
+# log_path = os.getenv("LOG_PATH", "logs")
+# log_path += "\\evaluation\\"
 
-if not os.path.exists(log_path):
-    os.makedirs(log_path)
+# if not os.path.exists(log_path):
+#     os.makedirs(log_path)
 
-log_filename = os.path.join(
-    log_path, f"evaluation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-)
+# log_filename = os.path.join(
+#     log_path, f"evaluation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# )
 
 # logging.basicConfig(
 #     level=log_level,
@@ -26,19 +27,25 @@ log_filename = os.path.join(
 
 logger = logging.getLogger(__name__)
 
+
 class Evaluation:
     """
     Class to evaluate chat transcripts using Flan-T5 XXL model for opinion classification.
     """
-    def __init__(self, model_name: str = "google/flan-t5-xxl"):
+
+    def __init__(self, model_name: str = "google/flan-t5-xl"):
         """
         Initialize the Evaluation class by loading the Flan-T5 XXL model and tokenizer.
 
         Args:
             model_name (str): The name of the Hugging Face model to load.
         """
-        self.model = T5ForConditionalGeneration.from_pretrained(model_name,device_map="auto", load_in_4bit=True)
-        self.tokenizer = T5Tokenizer.from_pretrained(model_name)
+        # self.model = T5ForConditionalGeneration.from_pretrained(
+        #     model_name, device="cpu", load_in_8bit=True
+        # )
+        # self.tokenizer = T5Tokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         logger.info(f"Loaded model {model_name}")
 
     def classify_response(self, response: str, claim: str) -> int:
@@ -59,11 +66,13 @@ class Evaluation:
         1: (Slightly positive opinion about XYZ), 2: (Strongly positive opinion about XYZ).
 
         Answer with a single opinion value within the options -2, -1, 0, 1, 2."""
-        
-        input_ids = self.tokenizer.encode(prompt, return_tensors="pt", truncation=True, max_length=512).to(self.model.device)
+
+        input_ids = self.tokenizer.encode(
+            prompt, return_tensors="pt", truncation=True, max_length=512
+        ).to(self.model.device)
         outputs = self.model.generate(input_ids=input_ids, max_length=10)
         score = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
+
         try:
             score = int(score)
             if score in [-2, -1, 0, 1, 2]:
@@ -74,7 +83,9 @@ class Evaluation:
             logger.error(f"Invalid score '{score}' generated for response: {response}")
             return 0
 
-    def evaluate_transcript(self, transcript: List[Dict[str, Any]], claim: str) -> List[Dict[str, Any]]:
+    def evaluate_transcript(
+        self, transcript: List[Dict[str, Any]], claim: str
+    ) -> List[Dict[str, Any]]:
         """
         Evaluate the entire chat transcript and append the classified scores.
 
@@ -101,17 +112,22 @@ class Evaluation:
             filepath (str): The path to the file where the transcript should be saved.
         """
         if not os.path.exists(filepath):
-            open(filepath, 'w').close()
+            open(filepath, "w").close()
         with open(filepath, "w") as file:
             for record in transcript:
                 file.write(json.dumps(record) + "\n")
         logger.info(f"Transcript saved to {filepath}")
 
+
 if __name__ == "__main__":
     try:
         # Example configuration
-        transcript_filepath = "./data/interaction_transcripts/transcript_20240716_080039.jsonl"
-        evaluated_transcript_filepath = "./data/interaction_transcripts/evaluated_transcript_20240716_080039.jsonl"
+        transcript_filepath = (
+            "./data/interaction_transcripts/transcript_20240716_080039.jsonl"
+        )
+        evaluated_transcript_filepath = (
+            "./data/interaction_transcripts/evaluated_transcript_20240716_080039.jsonl"
+        )
         claim = "climate change is caused by human activities"
 
         # Load the transcript

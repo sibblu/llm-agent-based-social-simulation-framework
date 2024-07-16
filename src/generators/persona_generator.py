@@ -12,14 +12,14 @@ from ..interfaces.llm_interface import LLM, LLMConfig, Message
 load_dotenv()
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "INFO")
-log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\persona_generator\\"
+# log_level = os.getenv("LOG_LEVEL", "INFO")
+# log_path = os.getenv("LOG_PATH", "logs")
+# log_path += "\\persona_generator\\"
 
-if not os.path.exists(log_path):
-    os.makedirs(log_path)
+# if not os.path.exists(log_path):
+#     os.makedirs(log_path)
 
-log_filename = os.path.join(log_path, f"persona_generator_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+# log_filename = os.path.join(log_path, f"persona_generator_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
 # logging.basicConfig(
 #     filename=log_filename,

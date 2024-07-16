@@ -11,13 +11,13 @@ from src.evaluations.evaluation import Evaluation
 from src.evaluations.opinion_dynamics import OpinionDynamics
 from src.generators.agent_generator import Agent, AgentConfig, LLMConfig
 from src.generators.persona_generator import PersonaGenerator
-from src.interfaces.llm_interface import LLM
+from src.interfaces.llm_interface import LLM, Message
 from src.managers.interaction_manager import InteractionManager
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "INFO")
+log_level = os.getenv("LOG_LEVEL", "DEBUG")
 log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\orchestrator\\"
+log_path += "/orchestrator/"
 
 if not os.path.exists(log_path):
     os.makedirs(log_path)
@@ -34,11 +34,19 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 class Orchestrator:
     """
     Class to orchestrate the entire pipeline of the social simulation framework.
     """
-    def __init__(self, topics: List[str], llm_config: Dict[str, Any], provider: str, max_exchanges: int = 30):
+
+    def __init__(
+        self,
+        topics: List[str],
+        llm_config: Dict[str, Any],
+        provider: str,
+        max_exchanges: int = 30,
+    ):
         """
         Initialize the Orchestrator with a list of topics, LLM configuration, provider, and the maximum number of message exchanges.
 
@@ -55,7 +63,9 @@ class Orchestrator:
         self.data_path = "data"
         if not os.path.exists(self.data_path):
             os.makedirs(self.data_path)
-        logger.info("Initialized Orchestrator with topics, llm_config, provider, and max_exchanges.")
+        logger.info(
+            "Initialized Orchestrator with topics, llm_config, provider, and max_exchanges."
+        )
 
     def run_simulation(self):
         """
@@ -63,47 +73,77 @@ class Orchestrator:
         """
         for topic in self.topics:
             logger.info(f"Starting simulation for topic: {topic}")
-            topic_path = os.path.join(self.data_path, topic.replace(" ", "_"))
+            topic_path = os.path.join(self.data_path, topic.replace(" ", "_")[:30].lower())
             if not os.path.exists(topic_path):
                 os.makedirs(topic_path)
 
             # Step 1: No Role Playing and No Interaction Condition
             no_role_play_reports = self.no_role_play_no_interaction(topic)
-            no_role_play_reports_path = os.path.join(topic_path, "no_role_play_no_interaction.jsonl")
+            no_role_play_reports_path = os.path.join(
+                topic_path, "no_role_play_no_interaction.jsonl"
+            )
             self.save_jsonl(no_role_play_reports, no_role_play_reports_path)
-            self.evaluate_no_interaction(no_role_play_reports, topic, topic_path, "no_role_play_no_interaction")
+            self.evaluate_no_interaction(
+                no_role_play_reports, topic, topic_path, "no_role_play_no_interaction"
+            )
 
             # Step 2: Generate personas
             personas = self.generate_personas(topic)
-            self.save_json(personas, os.path.join(topic_path, "personas.json"))
+            self.save_txt(personas, os.path.join(topic_path, "personas.txt"))
 
             # Step 3: No Interaction Condition
             no_interaction_reports = self.no_interaction(personas, topic)
-            no_interaction_reports_path = os.path.join(topic_path, "no_interaction.jsonl")
+            no_interaction_reports_path = os.path.join(
+                topic_path, "no_interaction.jsonl"
+            )
             self.save_jsonl(no_interaction_reports, no_interaction_reports_path)
-            self.evaluate_no_interaction(no_interaction_reports, topic, topic_path, "no_interaction")
+            evaluated_no_interaction_transcript = self.evaluate_transcript(
+                no_interaction_reports_path, topic
+            )
+            evaluated_no_interaction_transcript_path = os.path.join(
+                topic_path, "evaluated_no_interaction.jsonl"
+            )
+            self.save_jsonl(
+                evaluated_no_interaction_transcript,
+                evaluated_no_interaction_transcript_path,
+            )
+            opinion_dynamics_no_interaction = OpinionDynamics(
+                evaluated_no_interaction_transcript
+            )
+            metrics_no_interaction = opinion_dynamics_no_interaction.calculate_metrics()
+            metrics_no_interaction_path = os.path.join(
+                topic_path, "no_interaction_metrics.txt"
+            )
+            self.save_txt(metrics_no_interaction, metrics_no_interaction_path)
+            opinion_dynamics_no_interaction.plot_opinion_trajectories(
+                os.path.join(topic_path, "no_interaction_opinion_trajectories.png")
+            )
 
             # Step 4: Initialize agents
             agents = self.initialize_agents(personas, topic)
 
             # Step 5: Run interaction manager
             opening_message = f"What are your thoughts on the topic: {topic}?"
-            interaction_manager = InteractionManager(agents, opening_message)
-            interaction_manager.start_interaction(max_exchanges=self.max_exchanges)
+            interaction_manager = InteractionManager(agents, opening_message, self.max_exchanges)
+            interaction_manager.start_interaction()
             transcript_path = os.path.join(topic_path, "transcript.jsonl")
             interaction_manager.save_transcript(transcript_path)
 
             # Step 6: Evaluate chat transcript
             evaluated_transcript = self.evaluate_transcript(transcript_path, topic)
-            evaluated_transcript_path = os.path.join(topic_path, "evaluated_transcript.jsonl")
+            evaluated_transcript_path = os.path.join(
+                topic_path, "evaluated_transcript.jsonl"
+            )
             self.save_jsonl(evaluated_transcript, evaluated_transcript_path)
 
             # Step 7: Calculate opinion dynamics metrics and plot opinion trajectories
             opinion_dynamics = OpinionDynamics(evaluated_transcript)
             metrics = opinion_dynamics.calculate_metrics()
-            metrics_path = os.path.join(topic_path, "metrics.json")
-            self.save_json(metrics, metrics_path)
-            opinion_dynamics.plot_opinion_trajectories(os.path.join(topic_path, "opinion_trajectories.png"))
+            metrics_path = os.path.join(topic_path, "metrics.txt")
+            self.save_txt(metrics, metrics_path)
+            opinion_dynamics.plot_opinion_trajectories(
+                os.path.join(topic_path, "opinion_trajectories.png")
+            )
 
             logger.info(f"Completed simulation for topic: {topic}")
 
@@ -123,18 +163,22 @@ class Orchestrator:
         prompt = f"Provide your opinion on the topic: {topic}."
 
         for i in range(10):
-            response = llm.generate_completion([{"role": "user", "content": prompt}])
+            response = llm.generate_completion([Message(role="user", content=prompt)])
             report = {
                 "message_number": i,
                 "response": response,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
             reports.append(report)
-            logger.info(f"Generated opinion report without role playing and interaction: {response}")
+            logger.info(
+                f"Generated opinion report without role playing and interaction: {response}"
+            )
 
         return reports
 
-    def no_interaction(self, personas: Dict[str, Any], topic: str) -> List[Dict[str, Any]]:
+    def no_interaction(
+        self, personas: Dict[str, Any], topic: str
+    ) -> List[Dict[str, Any]]:
         """
         Generate opinion reports with role playing but without interaction.
 
@@ -164,7 +208,7 @@ class Orchestrator:
                     "agent_name": persona.identity["name"],
                     "stance": stance,
                     "response": response,
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
                 reports.append(report)
                 logger.info(f"Generated opinion report without interaction: {response}")
@@ -209,7 +253,9 @@ class Orchestrator:
             agents.append(agent)
         return agents
 
-    def evaluate_transcript(self, transcript_path: str, topic: str) -> List[Dict[str, Any]]:
+    def evaluate_transcript(
+        self, transcript_path: str, topic: str
+    ) -> List[Dict[str, Any]]:
         """
         Evaluate the chat transcript to classify opinion scores.
 
@@ -227,7 +273,9 @@ class Orchestrator:
         evaluated_transcript = evaluation.evaluate_transcript(transcript, topic)
         return evaluated_transcript
 
-    def evaluate_no_interaction(self, reports: List[Dict[str, Any]], topic: str, topic_path: str, condition: str):
+    def evaluate_no_interaction(
+        self, reports: List[Dict[str, Any]], topic: str, topic_path: str, condition: str
+    ):
         """
         Evaluate the control condition transcripts and calculate opinion dynamics metrics.
 
@@ -239,44 +287,48 @@ class Orchestrator:
         """
         evaluation = Evaluation()
         evaluated_reports = evaluation.evaluate_transcript(reports, topic)
-        evaluated_reports_path = os.path.join(topic_path, f"evaluated_{condition}.jsonl")
+        evaluated_reports_path = os.path.join(
+            topic_path, f"evaluated_{condition}.jsonl"
+        )
         self.save_jsonl(evaluated_reports, evaluated_reports_path)
 
         scores = [report["score"] for report in evaluated_reports]
         bias = np.mean(scores)
         diversity = np.std(scores)
         metrics = {"Bias": bias, "Diversity": diversity}
-        metrics_path = os.path.join(topic_path, f"{condition}_metrics.json")
-        self.save_json(metrics, metrics_path)
-        self.plot_opinion_trajectories(scores, os.path.join(topic_path, f"{condition}_trajectories.png"))
+        metrics_path = os.path.join(topic_path, f"{condition}_metrics.txt")
+        self.save_txt(metrics, metrics_path)
+        self.plot_opinion_trajectories(
+            scores, os.path.join(topic_path, f"{condition}_trajectories.png")
+        )
 
     def plot_opinion_trajectories(self, scores: List[float], save_path: str):
         """
         Plot the opinion trajectories over time.
         """
         plt.figure(figsize=(12, 6))
-        plt.plot(list(range(1, len(scores) + 1)), scores, marker='o', color='darkblue')
-        
-        plt.xlabel('Time Step')
-        plt.ylabel('Opinion Score')
-        plt.title('Opinion Trajectories Over Time')
-        plt.axhline(0, color='gray', linestyle='--', linewidth=0.5)
+        plt.plot(list(range(1, len(scores) + 1)), scores, marker="o", color="darkblue")
+
+        plt.xlabel("Time Step")
+        plt.ylabel("Opinion Score")
+        plt.title("Opinion Trajectories Over Time")
+        plt.axhline(0, color="gray", linestyle="--", linewidth=0.5)
         plt.ylim(-2, 2)
         plt.grid(True)
         plt.savefig(save_path)
         plt.show()
         logger.info("Plotted opinion trajectories over time.")
 
-    def save_json(self, data: Any, filepath: str):
+    def save_txt(self, data: Any, filepath: str):
         """
-        Save data to a JSON file.
-
+        Save data to a text file.
+    
         Args:
             data (Any): The data to save.
-            filepath (str): The path to the JSON file.
+            filepath (str): The path to the text file.
         """
         with open(filepath, "w") as file:
-            json.dump(data, file, indent=2)
+            file.write(str(data))
         logger.info(f"Saved data to {filepath}")
 
     def save_jsonl(self, data: List[Dict[str, Any]], filepath: str):
@@ -292,15 +344,22 @@ class Orchestrator:
                 file.write(json.dumps(record) + "\n")
         logger.info(f"Saved data to {filepath}")
 
+
 if __name__ == "__main__":
     try:
-        topics = ["Climate Change is human-induced.", "AI will take over many jobs."]
-        
+        topics = [
+            "Palmistry can predict someone’s future by looking at their palm.",
+            "AI will take over many jobs.",
+            "Vaccines are harmful.",
+            "Abortions should be legal.",
+            "Climate change is anthropogenic.",
+        ]
+
         config_openai = {
             "api_key_env": "OPENAI_API_KEY",
             "model": "gpt-4o-2024-05-13",
             "temperature": 1.0,
-            "max_tokens": 1024,
+            "max_tokens": 512,
             "top_p": 1.0,
             "stream": False,
             "stop": None,
@@ -308,7 +367,7 @@ if __name__ == "__main__":
         }
         provider = "openai"
 
-        orchestrator = Orchestrator(topics, config_openai, provider)
+        orchestrator = Orchestrator(topics, config_openai, provider, max_exchanges=30)
         orchestrator.run_simulation()
 
     except Exception as e:

@@ -8,16 +8,16 @@ from pydantic import ValidationError
 from ..generators.agent_generator import Agent
 
 # Set up logging
-log_level = os.getenv("LOG_LEVEL", "INFO")
-log_path = os.getenv("LOG_PATH", "logs")
-log_path += "\\interaction_manager\\"
+# log_level = os.getenv("LOG_LEVEL", "INFO")
+# log_path = os.getenv("LOG_PATH", "logs")
+# log_path += "\\interaction_manager\\"
 
-if not os.path.exists(log_path):
-    os.makedirs(log_path)
+# if not os.path.exists(log_path):
+#     os.makedirs(log_path)
 
-log_filename = os.path.join(
-    log_path, f"interaction_manager_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-)
+# log_filename = os.path.join(
+#     log_path, f"interaction_manager_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# )
 
 # logging.basicConfig(
 #     filename=log_filename,
