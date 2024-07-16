@@ -20,11 +20,11 @@ log_filename = os.path.join(
     log_path, f"agent_generator_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 )
 
-logging.basicConfig(
-    filename=log_filename,
-    level=log_level,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+# logging.basicConfig(
+#     filename=log_filename,
+#     level=log_level,
+#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ class MemoryStream(BaseModel):
     """
     Data structure for memory stream.
     """
+
     agent_id: str
     agent_name: str
     topic_claim: str
@@ -66,14 +67,13 @@ class Agent:
             </INITIAL_BELIEF>
             <INSTRUCTION>
             Now, {agent_name}, you will interact and discuss with another person about the theory XYZ that claims that {claim}. 
-            You can decide to change or maintain your belief about the theory XYZ after interacting (reading their thought/response) with other person.
+            You can decide to change or maintain your belief about the theory XYZ after interacting (sending and reading message) with other person.
             You should respond in a manner that reflects your current honest belief, and you should also read the other person's response carefully.
             
             After each interaction, you will be given chance to reflect on the conversation and update your reflective memory. Based on your reflection, decide if you wish to continue or discontinue the conversation.
-            If you believe that continuing the conversation is no longer productive or if you have reached a firm conclusion, then respond with "I have decided to discontinue the conversation.".
+            If you believe that continuing the conversation is no longer productive or if you have reached a firm conclusion, then just respond with "I have decided to discontinue the conversation.".
             If you decide to continue, proceed with your regular response without indicating your decision to continue.
             </INSTRUCTION>""",
-
         "response_prompt": """{agent_name}, given below is your experience so far, and the other person's message for you. Write your response. The response should reflect your current honest belief about the theory XYZ that claims that {claim}.
             <PAST_REFLECTION>Your past reflections:
                 {past_reflection}
@@ -82,12 +82,10 @@ class Agent:
                 {other_person_response}
             </MESSAGE>
             What is your current honest belief about the theory XYZ that claims {claim}? Specifically, focus on your opinion about XYZ after reading the other person’s message.
-            Think step by step about your and write your response.
+            Think step by step and write your response.
 
             Your response: 
-            As {agent_name}, I """,
-
-
+            I """,
         "reflection_prompt": """Given below is your experience so far, and the other person's message and what you responsed to the other person.  
             <PAST_REFLECTION>Your past reflections:
             {past_reflection}
@@ -101,8 +99,7 @@ class Agent:
             </RESPONSE>
             
             Now, please reflect on this experience. Summarize your updated experience in a few sentences.""",
-        "closed_world_prompt": 
-            """Remember, throughout the interactions, you are alone in your room with limited access to the Internet. 
+        "closed_world_prompt": """Remember, throughout the interactions, you are alone in your room with limited access to the Internet. 
                 You cannot search for information about XYZ on the Internet. 
                 You cannot go out to ask other people about XYZ. Because you are alone in your room, you cannot leave your room to seek information about XYZ. 
                 To form your belief about XYZ, you can only rely on your initial belief about XYZ, along with the information you received from other person.""",
@@ -139,7 +136,9 @@ class Agent:
                 + Agent.prompt_templates["closed_world_prompt"]
             )
             self.system_prompt = Message(role="system", content=system_prompt_str)
-        logger.info(f"Initialized agent with persona: {json.dumps(self.persona.model_dump(), indent=2)}")
+        logger.info(
+            f"Initialized agent with persona: {json.dumps(self.persona.model_dump(), indent=2)}"
+        )
 
     def _initialize_persona_prompt(self) -> str:
         """
@@ -201,7 +200,6 @@ class Agent:
             other_person_response=other_person_response,
             agent_response=previous_response,
         )
-    
 
     def interact(self, other_person_response: str) -> str:
         """
@@ -220,7 +218,9 @@ class Agent:
         try:
             response = self.llm.generate_completion(messages)
             self._update_memories(response, other_person_response)
-            logger.info(f"Agent {self.persona.identity['name']} interacted successfully")
+            logger.info(
+                f"Agent {self.persona.identity['name']} interacted successfully"
+            )
             return response
         except Exception as e:
             logger.exception(f"Error during interaction for agent {self.agent_id}")
@@ -242,7 +242,9 @@ class Agent:
         )
         reflection_message = Message(role="user", content=reflection_prompt)
         try:
-            reflection_response = self.llm.generate_completion([self.system_prompt, reflection_message])
+            reflection_response = self.llm.generate_completion(
+                [self.system_prompt, reflection_message]
+            )
             self.current_reflection = reflection_response
             logger.info(f"Agent {self.persona.identity['name']} reflected successfully")
             return reflection_response
@@ -265,25 +267,18 @@ class Agent:
                 {
                     "timestamp": timestamp,
                     "type": "read",
-                    "content": other_person_response
+                    "content": other_person_response,
                 }
             )
 
         self.memory_stream.cumulative_memory.append(
-            {
-                "timestamp": timestamp,
-                "type": "respond",
-                "content": agent_response
-            }
+            {"timestamp": timestamp, "type": "respond", "content": agent_response}
         )
 
         # Update reflective memory
         reflection_response = self.reflect(other_person_response, agent_response)
         self.memory_stream.reflective_memory.append(
-            {
-                "timestamp": datetime.now().isoformat(),
-                "content": reflection_response
-            }
+            {"timestamp": datetime.now().isoformat(), "content": reflection_response}
         )
 
     def save_memory_stream(self, filepath: str):
@@ -294,7 +289,7 @@ class Agent:
             filepath (str): The path to the file where the memory stream should be saved.
         """
         if not os.path.exists(filepath):
-            open(filepath, 'w').close()
+            open(filepath, "w").close()
         with open(filepath, "w") as file:
             file.write(self.memory_stream.model_dump_json(indent=2))
         logger.info(f"Agent {self.agent_id} memory stream saved to {filepath}")
@@ -319,7 +314,9 @@ if __name__ == "__main__":
         persona_generator = PersonaGenerator(llm)
         topic = "The Earth is flat"
         additional_instruction = "Make sure the persona is diverse and not cliched."
-        personas = persona_generator.generate_personas(topic=topic, additional_instructions=additional_instruction)
+        personas = persona_generator.generate_personas(
+            topic=topic, additional_instructions=additional_instruction
+        )
         # Example agent configuration
         agent_config = AgentConfig(
             persona=personas["positive"],
@@ -336,7 +333,7 @@ if __name__ == "__main__":
         response = agent.interact(other_person_response)
         print(f"Agent response: {response}")
 
-        reflection = agent.reflect(other_person_response, response)
+        reflection = agent.current_reflection
         print(f"Agent reflection: {reflection}")
 
         # Save agent memory stream
