@@ -149,7 +149,7 @@ class LLM:
                 response = self._generate_openai_completion(formatted_messages)
             elif self.provider == "groq":
                 response = self._generate_groq_completion(formatted_messages)
-                sleep(1.5)
+                sleep(2) # Sleep for 2 seconds to avoid rate limiting. 30 requests per minute.
             else:
                 logger.error(f"Unsupported provider: {self.provider}")
                 raise ValueError(f"Unsupported provider: {self.provider}")
