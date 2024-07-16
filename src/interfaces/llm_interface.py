@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from time import sleep
 from typing import Any, Dict, List, Optional
 
 import groq
@@ -113,9 +114,6 @@ class LLM:
 
         logger.info("Initialized LLM object with provider: %s", self.provider)
 
-    @retry(
-        stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True
-    )
     def generate_completion(self, messages: List[Message]) -> str:
         """Fallback to generate_response. (For backward compatibility)
         message: List[Message]
@@ -126,10 +124,10 @@ class LLM:
             Message(role="user", content="What is the capital of France? Respond in Hindi and French.")
         ]
 
-        
+
         """
         return self.generate_response(messages)
-    
+
     @retry(
         stop=stop_after_attempt(num_retries), wait=wait_fixed(wait_time), reraise=True
     )
@@ -151,6 +149,7 @@ class LLM:
                 response = self._generate_openai_completion(formatted_messages)
             elif self.provider == "groq":
                 response = self._generate_groq_completion(formatted_messages)
+                sleep(1.5)
             else:
                 logger.error(f"Unsupported provider: {self.provider}")
                 raise ValueError(f"Unsupported provider: {self.provider}")
