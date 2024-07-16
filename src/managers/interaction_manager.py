@@ -55,8 +55,7 @@ class InteractionManager:
         continue_interaction = True
         agent_index = 0
         messages_exchanged = 0
-        start_time = datetime.now().isoformat()
-        total_time = 0
+        
         print("Starting Interaction...")
         print("Interaction Manager --> {agent}".format(agent=self.agents[agent_index].persona.identity["name"]))
         print("Opening message: {message}".format(message=self.opening_message))
@@ -82,7 +81,6 @@ class InteractionManager:
             if "I have decided to discontinue the conversation" in response:
                 logger.info("Agent {agent_name} has decided to discontinue the conversation.".format(agent_name=agent.persona.identity["name"]))                
                 continue_interaction = False
-                total_time = datetime.now().isoformat() - start_time
                 break
 
             messages_exchanged += 1
@@ -91,7 +89,6 @@ class InteractionManager:
 
         logger.info("\nInteraction finished.")
         logger.info(f"\nTotal messages exchanged: {messages_exchanged}")
-        logger.info("\nTotal time taken: {total_time}".format(total_time=total_time))
 
     def save_transcript(self, filepath: str):
         """
@@ -165,7 +162,7 @@ if __name__ == "__main__":
         interaction_manager.start_interaction()
 
         # Save transcript
-        transcript_filepath = "./data/interaction_transcripts/transcript{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+        transcript_filepath = "./data/interaction_transcripts/transcript_{timestamp}.jsonl".format(timestamp=datetime.now().strftime('%Y%m%d_%H%M%S'))
         interaction_manager.save_transcript(transcript_filepath)
 
     except ValidationError as e:
