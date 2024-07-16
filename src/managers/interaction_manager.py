@@ -54,7 +54,7 @@ class InteractionManager:
         current_message = self.opening_message
         continue_interaction = True
         agent_index = 0
-        messages_exchanged = 0
+        messages_exchanged = 1
         
         print("Starting Interaction...")
         print("Interaction Manager --> {agent}".format(agent=self.agents[agent_index].persona.identity["name"]))
