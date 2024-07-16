@@ -64,7 +64,7 @@ class OpinionDynamics:
         logger.info(f"Calculated metrics: {metrics}")
         return metrics
 
-    def plot_opinion_trajectories(self):
+    def plot_opinion_trajectories(self, save_path: str = "opinion_trajectories.png"):
         """
         Plot the opinion trajectories over time.
         """
@@ -85,7 +85,7 @@ class OpinionDynamics:
         plt.ylim(-2, 2)
         plt.legend()
         plt.grid(True)
-        plt.savefig("opinion_trajectories.png")
+        plt.savefig(save_path)
         plt.show()
         logger.info("Plotted opinion trajectories over time.")
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         # Load the evaluated transcript
         with open(evaluated_transcript_filepath, "r") as file:
             transcript = [json.loads(line) for line in file]
-
+    
         # Initialize OpinionDynamics with the transcript
         opinion_dynamics = OpinionDynamics(transcript)
 
@@ -105,8 +105,10 @@ if __name__ == "__main__":
         print(f"Positive Agent - Bias: {metrics['positive']['Bias']}, Diversity: {metrics['positive']['Diversity']}")
         print(f"Negative Agent - Bias: {metrics['negative']['Bias']}, Diversity: {metrics['negative']['Diversity']}")
 
+        #path to save the plot
+        save_path = "./data/opinion_trajectories.png"
         # Plot opinion trajectories
-        opinion_dynamics.plot_opinion_trajectories()
+        opinion_dynamics.plot_opinion_trajectories(save_path)
 
     except Exception as e:
         logger.exception("An error occurred")

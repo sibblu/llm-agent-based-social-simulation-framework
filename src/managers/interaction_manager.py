@@ -118,7 +118,7 @@ if __name__ == "__main__":
             "api_key_env": "OPENAI_API_KEY",
             "model": "gpt-4o-2024-05-13",
             "temperature": 1.0,
-            "max_tokens": 2048,
+            "max_tokens": 512,
             "top_p": 1.0,
             "stream": False,
             "stop": None,
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             "api_key_env": "GROQ_API_KEY",
             "model": "llama3-70b-8192",
             "temperature": 1.0,
-            "max_tokens": 2048,
+            "max_tokens": 512,
             "top_p": 1.0,
             "stream": False,
             "stop": None,
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
         # Initialize InteractionManager with agents and opening message
         opening_message = "Climate change is a pressing global issue, because {topic} What are your thoughts?".format(topic=topic)
-        interaction_manager = InteractionManager([agent_1, agent_2], opening_message, max_interactions=20)
+        interaction_manager = InteractionManager([agent_1, agent_2], opening_message, max_interactions=30)
 
         # Start interaction
         interaction_manager.start_interaction()
