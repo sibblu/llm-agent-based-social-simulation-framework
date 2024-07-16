@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
         # Initialize InteractionManager with agents and opening message
         opening_message = "Climate change is a pressing global issue, because {topic} What are your thoughts?".format(topic=topic)
-        interaction_manager = InteractionManager([agent_1, agent_2], opening_message, max_interactions=60)
+        interaction_manager = InteractionManager([agent_1, agent_2], opening_message, max_interactions=20)
 
         # Start interaction
         interaction_manager.start_interaction()
