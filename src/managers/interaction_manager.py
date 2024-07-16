@@ -91,7 +91,7 @@ class InteractionManager:
 
         logger.info("\nInteraction finished.")
         logger.info(f"\nTotal messages exchanged: {messages_exchanged}")
-        logger.info("\nTotal time taken: {total_time}".format(total_time))
+        logger.info("\nTotal time taken: {total_time}".format(total_time=total_time))
 
     def save_transcript(self, filepath: str):
         """
