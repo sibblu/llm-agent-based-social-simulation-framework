@@ -137,7 +137,7 @@ if __name__ == "__main__":
         llm_provider_openai = "openai"
         llm_provider_groq = "groq"
         # Initialize persona generator and generate personas
-        llm = LLM(provider=llm_provider_groq, config=config_groq)
+        llm = LLM(provider=llm_provider_openai, config=config_openai)
         persona_generator = PersonaGenerator(llm)
         topic = "Climate Change is human induced."
         personas = persona_generator.generate_personas(topic=topic)
@@ -145,18 +145,18 @@ if __name__ == "__main__":
         # Example agent configurations
         agent_config_1 = AgentConfig(
             persona=personas["negative"],
-            llm_config=LLMConfig(**config_groq),
+            llm_config=LLMConfig(**config_openai),
             closed_world=True,
         )
 
         agent_config_2 = AgentConfig(
             persona=personas["positive"],
-            llm_config=LLMConfig(**config_groq),
+            llm_config=LLMConfig(**config_openai),
             closed_world=True,
         )
 
-        agent_1 = Agent(agent_config_1, llm_provider_groq)
-        agent_2 = Agent(agent_config_2, llm_provider_groq)
+        agent_1 = Agent(agent_config_1, llm_provider_openai)
+        agent_2 = Agent(agent_config_2, llm_provider_openai)
 
         # Initialize InteractionManager with agents and opening message
         opening_message = "Climate change is a pressing global issue, because {topic} What are your thoughts?".format(topic=topic)

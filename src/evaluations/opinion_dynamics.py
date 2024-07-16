@@ -72,11 +72,12 @@ class OpinionDynamics:
         negative_scores = [entry["score"] for entry in self.transcript if entry["stance"] == "negative"]
         
         # Determine the number of time steps
-        time_steps = list(range(1, len(positive_scores) + 1))
+        min_length = min(len(positive_scores), len(negative_scores))
+        time_steps = list(range(1, min_length + 1))
         
         plt.figure(figsize=(12, 6))
-        plt.plot(time_steps, positive_scores, marker='o', color='darkblue', label='Positive Stance Agent')
-        plt.plot(time_steps, negative_scores, marker='o', color='red', label='Negative Stance Agent')
+        plt.plot(time_steps, positive_scores[:min_length], marker='o', color='darkblue', label='Positive Stance Agent')
+        plt.plot(time_steps, negative_scores[:min_length], marker='o', color='red', label='Negative Stance Agent')
         
         plt.xlabel('Time Step')
         plt.ylabel('Opinion Score')
@@ -91,8 +92,9 @@ class OpinionDynamics:
 
 if __name__ == "__main__":
     try:
-        evaluated_transcript_filepath = "./data/interaction_transcripts/evaluated_transcript_20240716_054625.jsonl"
-
+        evaluated_transcript_filepath = "./data/interaction_transcripts/"
+        evaluated_transcript_filename = "evaluated_transcript_20240716_055453.jsonl"
+        evaluated_transcript_filepath += evaluated_transcript_filename
         # Load the evaluated transcript
         with open(evaluated_transcript_filepath, "r") as file:
             transcript = [json.loads(line) for line in file]
@@ -104,9 +106,15 @@ if __name__ == "__main__":
         metrics = opinion_dynamics.calculate_metrics()
         print(f"Positive Agent - Bias: {metrics['positive']['Bias']}, Diversity: {metrics['positive']['Diversity']}")
         print(f"Negative Agent - Bias: {metrics['negative']['Bias']}, Diversity: {metrics['negative']['Diversity']}")
-
+        # Save the metrics to a file txt
+        metrics_filepath = "./data/{}_opinion_metrics.txt".format(evaluated_transcript_filename)
+        with open(metrics_filepath, "w") as file:
+            file.write("Opinion Dynamics Metrics: {topic}\n".format(topic=transcript[0]["topic"]))
+            file.write(f"Positive Agent - Bias: {metrics['positive']['Bias']}, Diversity: {metrics['positive']['Diversity']}\n")
+            file.write(f"Negative Agent - Bias: {metrics['negative']['Bias']}, Diversity: {metrics['negative']['Diversity']}\n")
+            file.write("LLM models used: {llm_models}\n".format(llm_models=", ".join(set([entry["llm_model"] for entry in transcript]))))
         #path to save the plot
-        save_path = "./data/opinion_trajectories.png"
+        save_path = "./data/{}_opinion_trajectory.png".format(evaluated_transcript_filename)
         # Plot opinion trajectories
         opinion_dynamics.plot_opinion_trajectories(save_path)
 
