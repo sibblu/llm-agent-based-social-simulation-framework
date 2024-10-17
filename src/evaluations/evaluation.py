@@ -59,7 +59,7 @@ class Evaluation:
         Returns:
             int: The classified opinion score between -2 and 2.
         """
-        prompt = f"""Here’s a statement made by a person after seeing a message.
+        prompt = f"""Here's a statement made by a person after seeing a message.
         --{response}
         --What is their belief about the Theory XYZ that claims that {claim}, right after they saw this message, on a 5-point Likert scale: -2: (Strongly negative opinion about XYZ), 
         -1: (Slightly negative opinion about XYZ), 0: (Neutral opinion about XYZ), 
