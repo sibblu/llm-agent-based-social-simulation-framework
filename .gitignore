@@ -2,3 +2,5 @@
 *.log
 .venv
 *.pyc
+.conda
+thesis_structure.md
