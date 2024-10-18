@@ -53,7 +53,6 @@ social_simulation_framework/
     ├── configuration.md
     ├── development.md
 
-
 Directory and File Descriptions
 Project Root Directory
 
@@ -97,25 +96,8 @@ evaluation_metrics.py: Code for calculating opinion dynamics metrics.
 linguistic_evaluation.py: Code for evaluating linguistic aspects of interactions.
 utils/
 
-Utility functions and helper modules.
-helpers.py: Common helper functions.
-exceptions.py: Custom exception classes.
-logger.py: Custom logging setup.
-tests/
-
-Unit and integration tests for all modules.
-test_persona_generator.py: Tests for persona generator.
-test_agent_generator.py: Tests for agent generator.
-test_interaction_manager.py: Tests for interaction manager.
-test_prompt_manager.py: Tests for prompt manager.
-test_llm_interface.py: Tests for LLM interface.
-test_evaluation_metrics.py: Tests for evaluation metrics.
-test_linguistic_evaluation.py: Tests for linguistic evaluation.
-docs/
-
 Documentation files.
 index.md: Project documentation index.
 architecture.md: Detailed architecture documentation.
 usage.md: Guide on how to use the framework.
 configuration.md: Instructions on configuring the framework.
-development.md: Guide for developers contributing to the framework.
