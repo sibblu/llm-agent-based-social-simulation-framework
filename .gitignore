@@ -4,3 +4,4 @@
 *.pyc
 .conda
 thesis_structure.md
+.DS_Store
