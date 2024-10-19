@@ -5,7 +5,7 @@ The Social Simulation Framework is a comprehensive system designed to simulate s
 ## Disclosure
 This project has been developed as a part of the master's thesis titled "Open-source Framework for Social
 Simulations using Generative-Agents with Opinion Dynamics as a Case Study" at the RWTH Aachen University, for the Master's program in Computational Social Systems.
-The thesis is supervised by Prof. Dr. Jana Lasser and Joao Pinheiro Neto. 
+The thesis is supervised by Prof. Dr. Jana Lasser and Dr. Joao Pinheiro Neto. 
 
 ## Features
 
