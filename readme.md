@@ -2,6 +2,11 @@
 # LLM Agent-Based Social Simulation Framework
 The Social Simulation Framework is a comprehensive system designed to simulate social interactions and evaluate opinion dynamics using generative AI. This framework orchestrates the entire simulation pipeline, including generating personas, initializing agents, managing interactions, formatting prompts, interacting with Large Language Model (LLM) APIs, and evaluating results. The modular design ensures scalability, maintainability, and ease of integration, making it a robust and flexible tool for researchers and developers interested in social simulations and opinion dynamics.
 
+## Disclosure
+This project has been developed as a part of the master's thesis titled "Open-source Framework for Social
+Simulations using Generative-Agents with Opinion Dynamics as a Case Study" at the RWTH Aachen University, for the Master's program in Computational Social Systems.
+The thesis is supervised by Prof. Dr. Jana Lasser and Joao Pinheiro Neto. 
+
 ## Features
 
 - **Persona Generation**: Create detailed personas with identity, demographics, and initial beliefs based on given topics.
@@ -51,14 +56,23 @@ The core Python scripts in the Social Simulation Framework repository are organi
 
 social-simulation-framework/ 
 ├── src/
+
 │ ├── generators/ 
+
 │ │ ├── agent_generator.py │ │ ├── persona_generator.py 
+
 │ ├── interfaces/ 
+
 │ │ ├── llm_interface.py 
+
 │ ├── managers/ 
+
 │ │ ├── prompt_manager.py │ │ ├── interaction_manager.py 
+
 │ ├── evaluations/ 
+
 │ │ ├── [opinion_dynamics.py]
+
 ├── [orchestrator.py]
 
 
