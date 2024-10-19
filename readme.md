@@ -12,6 +12,11 @@ The Social Simulation Framework is a comprehensive system designed to simulate s
 - **Evaluation Metrics**: Calculate and evaluate opinion dynamics metrics such as bias and diversity.
 - **Data Storage**: Efficiently store interaction transcripts, evaluation results, and logs for further analysis.
 
+## Architecture, Data-Flow and Sequence Diagrams
+Check out the detailed architecture, data-flow, and sequence diagrams in the respective markdown files for a comprehensive understanding of the framework's design and functionality.
+- **[Architecture Diagram](architecture.md)**: Overview of the system architecture and components using C4 model.
+- **[Data Flow Diagram](data_flow_diagram.md)**: Visualization of data flow and dependencies between system components.
+- **[Sequence Diagram](sequence_diagram.md)**: Sequence of interactions between system components during a simulation run.
 
 ## Installation
 1. Clone the repository:
@@ -37,11 +42,6 @@ python orchestrator.py
 ```
 3. Check the data and logs directories for interaction transcripts, evaluation results, and logs.
 
-## Architecture, Data-Flow and Sequence Diagrams
-Check out the detailed architecture, data-flow, and sequence diagrams in the respective markdown files for a comprehensive understanding of the framework's design and functionality.
-- **[Architecture Diagram](architecture.md)**: Overview of the system architecture and components using C4 model.
-- **[Data Flow Diagram](data_flow_diagram.md)**: Visualization of data flow and dependencies between system components.
-- **[Sequence Diagram](sequence_diagram.md)**: Sequence of interactions between system components during a simulation run.
 
 ## Core Python Scripts
 
@@ -50,7 +50,7 @@ The core Python scripts in the Social Simulation Framework repository are organi
 ### Root Directory
 
 social-simulation-framework/ 
-├── src/ 
+├── src/
 │ ├── generators/ 
 │ │ ├── agent_generator.py │ │ ├── persona_generator.py 
 │ ├── interfaces/ 
