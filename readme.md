@@ -55,6 +55,7 @@ The core Python scripts in the Social Simulation Framework repository are organi
 ### Root Directory
 
 social-simulation-framework/ 
+
 ├── src/
 
 │ ├── generators/ 
