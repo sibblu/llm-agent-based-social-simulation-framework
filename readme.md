@@ -1,103 +1,103 @@
-social_simulation_framework/
-│
-├── README.md
-├── setup.py
-├── requirements.txt
-├── .gitignore
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── config/
-│   │   ├── __init__.py
-│   │   ├── settings.py
-│   │   ├── logging_config.py
-│   │   ├── llm_config.py
-│   │   ├── agent_config.py
-│   │   ├── evaluation_config.py
-│   ├── data/
-│   │   ├── __init__.py
-│   │   ├── sample_data.json
-│   ├── generators/
-│   │   ├── __init__.py
-│   │   ├── persona_generator.py
-│   │   ├── agent_generator.py
-│   ├── managers/
-│   │   ├── __init__.py
-│   │   ├── interaction_manager.py
-│   │   ├── prompt_manager.py
-│   ├── interfaces/
-│   │   ├── __init__.py
-│   │   ├── llm_interface.py
-│   ├── evaluators/
-│   │   ├── __init__.py
-│   │   ├── evaluation_metrics.py
-│   │   ├── linguistic_evaluation.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── helpers.py
-│   │   ├── exceptions.py
-│   │   ├── logger.py
-│   ├── tests/
-│       ├── __init__.py
-│       ├── test_persona_generator.py
-│       ├── test_agent_generator.py
-│       ├── test_interaction_manager.py
-│       ├── test_prompt_manager.py
-│       ├── test_llm_interface.py
-│       ├── test_evaluation_metrics.py
-│       ├── test_linguistic_evaluation.py
-└── docs/
-    ├── index.md
-    ├── architecture.md
-    ├── usage.md
-    ├── configuration.md
-    ├── development.md
 
-Directory and File Descriptions
-Project Root Directory
+# LLM Agent-Based Social Simulation Framework
+The Social Simulation Framework is a comprehensive system designed to simulate social interactions and evaluate opinion dynamics using generative AI. This framework orchestrates the entire simulation pipeline, including generating personas, initializing agents, managing interactions, formatting prompts, interacting with Large Language Model (LLM) APIs, and evaluating results. The modular design ensures scalability, maintainability, and ease of integration, making it a robust and flexible tool for researchers and developers interested in social simulations and opinion dynamics.
 
-README.md: Overview of the project, installation instructions, and basic usage.
-setup.py: Setup script for installing the framework.
-requirements.txt: List of dependencies required for the project.
-.gitignore: Specifies files and directories to be ignored by git.
-src/
+## Features
 
-Main source code directory.
-config/
+- **Persona Generation**: Create detailed personas with identity, demographics, and initial beliefs based on given topics.
+- **Agent Management**: Generate and manage LLM-powered agents capable of interacting and reflecting on past interactions.
+- **Interaction Management**: Facilitate and manage interactions between agents, ensuring adherence to defined protocols.
+- **Prompt Management**: Format and structure prompts for interactions, ensuring compatibility with various LLM APIs.
+- **LLM Integration**: Seamlessly interact with external LLM APIs like OpenAI and Groq for generating responses and personas.
+- **Evaluation Metrics**: Calculate and evaluate opinion dynamics metrics such as bias and diversity.
+- **Data Storage**: Efficiently store interaction transcripts, evaluation results, and logs for further analysis.
 
-Configuration files for different aspects of the framework.
-settings.py: General settings.
-logging_config.py: Configuration for logging.
-llm_config.py: Configuration specific to LLM interface.
-agent_config.py: Configuration for agent-related settings.
-evaluation_config.py: Configuration for evaluation parameters.
-data/
 
-Directory for storing sample data or initial datasets.
-sample_data.json: Example data file.
-generators/
+## Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/sibblu/llm-agent-based-social-simulation-framework.git
+cd llm-agent-based-social-simulation-framework
+```
+2. Create a virtual environment and activate it:
+```bash
+python3 -m venv venv
+source .venv/bin/activate # on Windows, use .venv\Scripts\activate
+```
+3. Install the required packages:
+```bash
+pip install -r requirements.txt
+```
 
-Contains modules for generating personas and agents.
-persona_generator.py: Code for generating topical personas.
-agent_generator.py: Code for generating agents based on personas.
-managers/
+## Usage
+1. Configure the `.env` file with your API keys and other necessary configurations.
+2. Run the orchestrator to start the simulation:
+```bash
+python orchestrator.py
+```
+3. Check the data and logs directories for interaction transcripts, evaluation results, and logs.
 
-Modules responsible for managing interactions and prompts.
-interaction_manager.py: Code for managing agent interactions.
-prompt_manager.py: Code for managing prompt formatting and structure.
-interfaces/
+## Architecture, Data-Flow and Sequence Diagrams
+Check out the detailed architecture, data-flow, and sequence diagrams in the respective markdown files for a comprehensive understanding of the framework's design and functionality.
+- **[Architecture Diagram](architecture.md)**: Overview of the system architecture and components using C4 model.
+- **[Data Flow Diagram](data_flow_diagram.md)**: Visualization of data flow and dependencies between system components.
+- **[Sequence Diagram](sequence_diagram.md)**: Sequence of interactions between system components during a simulation run.
 
-Interfaces for external integrations, especially with LLM APIs.
-llm_interface.py: Code for managing LLM API interactions.
-evaluators/
+## Core Python Scripts
 
-Modules for evaluating interaction transcripts.
-evaluation_metrics.py: Code for calculating opinion dynamics metrics.
-linguistic_evaluation.py: Code for evaluating linguistic aspects of interactions.
-utils/
+The core Python scripts in the Social Simulation Framework repository are organized into several directories, each serving a specific purpose. Below is the detailed file and folder hierarchy for the core scripts.
 
-Documentation files.
-index.md: Project documentation index.
-architecture.md: Detailed architecture documentation.
-usage.md: Guide on how to use the framework.
-configuration.md: Instructions on configuring the framework.
+### Root Directory
+
+social-simulation-framework/ 
+├── src/ 
+│ ├── generators/ 
+│ │ ├── agent_generator.py │ │ ├── persona_generator.py 
+│ ├── interfaces/ 
+│ │ ├── llm_interface.py 
+│ ├── managers/ 
+│ │ ├── prompt_manager.py │ │ ├── interaction_manager.py 
+│ ├── evaluations/ 
+│ │ ├── [opinion_dynamics.py]
+├── [orchestrator.py]
+
+
+### Directory and File Descriptions
+
+#### `src/`
+
+- **Purpose**: Contains the main source code for the framework.
+
+##### `generators/`
+
+- **Purpose**: Contains code for generating agents and personas.
+- **Files**:
+  - `agent_generator.py`: Code for generating and managing LLM-powered agents.
+  - `persona_generator.py`: Code for generating personas based on given topics.
+
+##### `interfaces/`
+
+- **Purpose**: Contains code for interfacing with external systems.
+- **Files**:
+  - `llm_interface.py`: Code for interacting with LLM APIs like OpenAI and Groq.
+
+##### `managers/`
+
+- **Purpose**: Contains code for managing various aspects of the framework.
+- **Files**:
+  - `prompt_manager.py`: Code for managing prompt formatting and structure.
+  - `interaction_manager.py`: Code for managing interactions between agents.
+
+##### `evaluations/`
+
+- **Purpose**: Contains code for evaluating opinion dynamics metrics.
+- **Files**:
+  - `opinion_dynamics.py`: Code for evaluating opinion dynamics metrics.
+
+#### Root Files
+
+- **`orchestrator.py`**: Main orchestrator script that coordinates the entire simulation pipeline.
+
+#### Summary
+
+The core Python scripts are organized to separate different concerns such as agent and persona generation, external system interfacing, prompt management, interaction management, and opinion dynamics evaluation. Each directory and file has a specific purpose, making the codebase modular and easy to navigate. This organization facilitates scalability, maintainability, and ease of understanding.
