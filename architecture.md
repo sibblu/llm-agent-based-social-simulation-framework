@@ -38,7 +38,6 @@ C4Container
         Container(promptManager, "Prompt Manager", "Python Class", "Manages prompt formatting and structure")
         Container(llmInterface, "LLM Interface", "Python Class", "Interacts with LLM APIs like OpenAI and Groq")
         Container(evaluationMetrics, "Evaluation Metrics", "Python Class", "Calculates opinion dynamics metrics")
-        Container(linguisticEvaluation, "Linguistic Evaluation", "Python Class", "Evaluates linguistic aspects of interactions")
         Container(dataStorage, "Data Storage", "File System", "Stores interaction transcripts and evaluation results")
         Container(logStorage, "Log Storage", "File System", "Stores logs")
     }
@@ -50,7 +49,6 @@ C4Container
     Rel_D(orchestrator, promptManager, "Formats prompts")
     Rel_D(orchestrator, llmInterface, "Interacts with LLM APIs")
     Rel_D(orchestrator, evaluationMetrics, "Evaluates opinion dynamics")
-    Rel_D(orchestrator, linguisticEvaluation, "Evaluates linguistic aspects")
     Rel_D(orchestrator, dataStorage, "Stores interaction transcripts and evaluation results")
     Rel_D(orchestrator, logStorage, "Stores logs")
 
